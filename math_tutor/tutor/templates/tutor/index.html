@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tutor Virtual de Matemáticas</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+</head>
+<body class="container mt-5">
+    <h1>Chats Personal</h1>
+    <form id="pregunta-form" class="form-group">
+        <label for="pregunta">Pregunta:</label>
+        <input type="text" id="pregunta" name="pregunta" class="form-control">
+        <button type="submit" class="btn btn-primary mt-2">Enviar</button>
+    </form>
+    <div id="respuesta" class="mt-3"></div>
+
+    <script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        document.getElementById('pregunta-form').onsubmit = function(e) {
+            e.preventDefault();
+            const pregunta = document.getElementById('pregunta').value;
+            fetch('/tutor/preguntar/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: 'pregunta=' + encodeURIComponent(pregunta)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.respuesta) {
+                    document.getElementById('respuesta').innerText = data.respuesta;
+                } else {
+                    document.getElementById('respuesta').innerText = 'Error: ' + (data.error || 'Unknown error');
+                }
+            });
+        };
+    </script>
+</body>
+</html>
